@@ -1,0 +1,18 @@
+{
+    "name": "UKG_TimesheetData_xml",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "Workforce Ready",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "Xml",
+        "typeProperties": {
+            "location": {
+                "type": "HttpServerLocation",
+                "relativeUrl": "v1/report/saved/19208038"
+            }
+        }
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}
