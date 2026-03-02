@@ -1,0 +1,1210 @@
+{
+    "name": "Extract Time Sheet Data from UKG",
+    "properties": {
+        "activities": [
+            {
+                "name": "GetKronosAPISettings",
+                "type": "Lookup",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": true,
+                    "secureInput": true
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureSqlSource",
+                        "queryTimeout": "02:00:00",
+                        "partitionOption": "None"
+                    },
+                    "dataset": {
+                        "referenceName": "UKGAPISettings",
+                        "type": "DatasetReference"
+                    },
+                    "firstRowOnly": false
+                }
+            },
+            {
+                "name": "Loop Through Settings",
+                "type": "ForEach",
+                "dependsOn": [
+                    {
+                        "activity": "GetKronosAPISettings",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "items": {
+                        "value": "@activity('GetKronosAPISettings').output.value",
+                        "type": "Expression"
+                    },
+                    "activities": [
+                        {
+                            "name": "Switch Settings",
+                            "type": "Switch",
+                            "dependsOn": [],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "on": {
+                                    "value": "@item().setting",
+                                    "type": "Expression"
+                                },
+                                "cases": [
+                                    {
+                                        "value": "BaseURI",
+                                        "activities": [
+                                            {
+                                                "name": "Set Base URI",
+                                                "type": "SetVariable",
+                                                "dependsOn": [],
+                                                "policy": {
+                                                    "secureOutput": false,
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "variableName": "BaseURI",
+                                                    "value": {
+                                                        "value": "@item().value",
+                                                        "type": "Expression"
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "value": "CompanyId",
+                                        "activities": [
+                                            {
+                                                "name": "Set Company Variable",
+                                                "type": "SetVariable",
+                                                "dependsOn": [],
+                                                "policy": {
+                                                    "secureOutput": false,
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "variableName": "CompanyId",
+                                                    "value": {
+                                                        "value": "@item().value",
+                                                        "type": "Expression"
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "value": "UserName",
+                                        "activities": [
+                                            {
+                                                "name": "Set Username Variable",
+                                                "type": "SetVariable",
+                                                "dependsOn": [],
+                                                "policy": {
+                                                    "secureOutput": false,
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "variableName": "APIUserName",
+                                                    "value": {
+                                                        "value": "@item().value",
+                                                        "type": "Expression"
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "value": "Password",
+                                        "activities": [
+                                            {
+                                                "name": "Set Password Variable",
+                                                "type": "SetVariable",
+                                                "dependsOn": [],
+                                                "policy": {
+                                                    "secureOutput": false,
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "variableName": "APIPassword",
+                                                    "value": {
+                                                        "value": "@item().value",
+                                                        "type": "Expression"
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "value": "APIKey",
+                                        "activities": [
+                                            {
+                                                "name": "Set API Key Variable",
+                                                "type": "SetVariable",
+                                                "dependsOn": [],
+                                                "policy": {
+                                                    "secureOutput": false,
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "variableName": "APIKey",
+                                                    "value": {
+                                                        "value": "@item().value",
+                                                        "type": "Expression"
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "value": "AzureFunctionKey",
+                                        "activities": [
+                                            {
+                                                "name": "Set Azure Function Key",
+                                                "type": "SetVariable",
+                                                "dependsOn": [],
+                                                "policy": {
+                                                    "secureOutput": false,
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "variableName": "AzureFunctionKey",
+                                                    "value": {
+                                                        "value": "@item().value",
+                                                        "type": "Expression"
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "GetAuthKey",
+                "type": "WebActivity",
+                "dependsOn": [
+                    {
+                        "activity": "Loop Through Settings",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "method": "POST",
+                    "headers": {
+                        "api-key": {
+                            "value": "@variables('APIKey')",
+                            "type": "Expression"
+                        },
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    "url": {
+                        "value": "@concat(variables('BaseURI'),'/v1/login')",
+                        "type": "Expression"
+                    },
+                    "body": {
+                        "value": "@concat('{\n  \"credentials\": {\n    \"username\": \"',variables('APIUserName'),'\",\n    \"password\": \"',variables('APIPassword'),'\",\n    \"company\": \"',variables('CompanyId'),'\"\n  }\n}')",
+                        "type": "Expression"
+                    }
+                }
+            },
+            {
+                "name": "Set Auth Key Variable",
+                "type": "SetVariable",
+                "dependsOn": [
+                    {
+                        "activity": "GetAuthKey",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "variableName": "AuthKey",
+                    "value": {
+                        "value": "@activity('GetAuthKey').output.token",
+                        "type": "Expression"
+                    }
+                }
+            },
+            {
+                "name": "Copy Timesheet Data to SQL",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "Set Auth Key Variable",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "XmlSource",
+                        "storeSettings": {
+                            "type": "HttpReadSettings",
+                            "requestMethod": "POST",
+                            "additionalHeaders": {
+                                "value": "@{concat('Content-Type: application/json\nAccept: application/xml\nHost: secure.workforceready.com.au:443\nAuthentication: Bearer ',variables('AuthKey'))}",
+                                "type": "Expression"
+                            },
+                            "requestBody": {
+                                "value": "@{concat('{\n   \"company\":{\n      \"short_name\":\"',variables('CompanyId'),'\"\n   },\n   \"selectors\":[\n      {\n         \"name\":\"EntryDate\",\n         \"parameters\":{\n            \"RangeType\":2,\n            \"FromDate\":\"',pipeline().parameters.timesheetStartDate,'\",\n            \"ToDate\":\"',pipeline().parameters.timesheetEndDate,'\"\n         }\n      }\n   ]\n}')}",
+                                "type": "Expression"
+                            },
+                            "requestTimeout": ""
+                        },
+                        "formatSettings": {
+                            "type": "XmlReadSettings",
+                            "validationMode": "none",
+                            "detectDataType": true,
+                            "namespaces": true
+                        }
+                    },
+                    "sink": {
+                        "type": "AzureSqlSink",
+                        "preCopyScript": "Truncate Table UKG_XMLDump",
+                        "disableMetricsCollection": false
+                    },
+                    "enableStaging": false,
+                    "enableSkipIncompatibleRow": false,
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "mappings": [
+                            {
+                                "source": {
+                                    "path": "$['result']['body']"
+                                },
+                                "sink": {
+                                    "name": "XMLData"
+                                }
+                            }
+                        ],
+                        "collectionReference": "",
+                        "mapComplexValuesToString": true
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "UKG_TimesheetData_xml",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "SQL_XML_Dump",
+                        "type": "DatasetReference"
+                    }
+                ]
+            },
+            {
+                "name": "Export Combined File To Excel",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "Copy Timesheet Data to SQL",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureSqlSource",
+                        "sqlReaderQuery": "select a.*, \ncase when (select count(*) from vUKGMultipleShifts z where a.Employeecode = z.EmployeeCode and a.Date = z.Date) > 1 then 'BROKEN' else '' end as BrokenShift\nfrom vUKGTimesheetExport a\nwhere a.EmployeeCode in (select distinct EmployeeCode from Employees)\norder by a.EmployeeCode, a.Date, a.FormattedStartTime",
+                        "queryTimeout": "02:00:00",
+                        "partitionOption": "None"
+                    },
+                    "sink": {
+                        "type": "DelimitedTextSink",
+                        "storeSettings": {
+                            "type": "AzureBlobStorageWriteSettings"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextWriteSettings",
+                            "quoteAllText": true,
+                            "fileExtension": ".txt"
+                        }
+                    },
+                    "enableStaging": false,
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "mappings": [
+                            {
+                                "source": {
+                                    "name": "EmployeeCode",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "EmployeeCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "FirstNames",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "FirstNames",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "LastName",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "LastName",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "EmployeeStatusCode",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "EmployeeStatusCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "PayPeriodCode",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "PayPeriodCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "HomeCC",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "HomeCC",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Location",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "Location",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "ContractCode",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "ContractCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "ContractDescription",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "ContractDescription",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "AwardCode",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "AwardCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "AwardDescription",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "AwardDescription",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Date",
+                                    "type": "DateTime",
+                                    "physicalType": "datetime"
+                                },
+                                "sink": {
+                                    "name": "Date",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Day",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "Day",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "DayFromDate",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "DayFromDate",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Schedule",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "Schedule",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "RawStartTime",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "RawStartTime",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "RawEndtime",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "RawEndtime",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "FormattedStartTime",
+                                    "type": "Decimal",
+                                    "physicalType": "decimal",
+                                    "scale": 2,
+                                    "precision": 19
+                                },
+                                "sink": {
+                                    "name": "FormattedStartTime",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "FormattedEndTime",
+                                    "type": "Decimal",
+                                    "physicalType": "decimal",
+                                    "scale": 2,
+                                    "precision": 20
+                                },
+                                "sink": {
+                                    "name": "FormattedEndTime",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "HasUnpaidBreak",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "HasUnpaidBreak",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "OverrideLunch",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "OverrideLunch",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "BreakAmount",
+                                    "type": "Decimal",
+                                    "physicalType": "decimal",
+                                    "scale": 2,
+                                    "precision": 38
+                                },
+                                "sink": {
+                                    "name": "BreakAmount",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "TotalAmount",
+                                    "type": "Decimal",
+                                    "physicalType": "decimal",
+                                    "scale": 2,
+                                    "precision": 38
+                                },
+                                "sink": {
+                                    "name": "TotalAmount",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Text",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "Text",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "TaskCode",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "TaskCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Allowance",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "Allowance",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "ReasonCode",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "ReasonCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Overtime",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "Overtime",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "BrokenShift",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "BrokenShift",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            }
+                        ],
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                            "allowDataTruncation": true,
+                            "treatBooleanAsNumber": false
+                        }
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SQL_Timesheet_Data",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "csv_TimesheetExport",
+                        "type": "DatasetReference"
+                    }
+                ]
+            },
+            {
+                "name": "Export All Clocks File To Excel",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "Export Combined File To Excel",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureSqlSource",
+                        "sqlReaderQuery": "select *,\ncase when (select count(*) from vUKGMultipleShifts z where a.Employeecode = z.EmployeeCode and a.Date = z.Date) > 1 then 'BROKEN' else '' end as BrokenShift\nfrom vUKGTimeSheetData a\nwhere a.EmployeeCode in (select distinct EmployeeCode from Employees)\norder by a.EmployeeCode, a.Date, a.FormattedStartTime",
+                        "queryTimeout": "02:00:00",
+                        "partitionOption": "None"
+                    },
+                    "sink": {
+                        "type": "DelimitedTextSink",
+                        "storeSettings": {
+                            "type": "AzureBlobStorageWriteSettings"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextWriteSettings",
+                            "quoteAllText": true,
+                            "fileExtension": ".txt"
+                        }
+                    },
+                    "enableStaging": false,
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "mappings": [
+                            {
+                                "source": {
+                                    "name": "EmployeeCode",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "EmployeeCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "FirstNames",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "FirstNames",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "LastName",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "LastName",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "EmployeeStatusCode",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "EmployeeStatusCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "PayPeriodCode",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "PayPeriodCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "HomeCC",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "HomeCC",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Location",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "Location",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "ContractCode",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "ContractCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "ContractDescription",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "ContractDescription",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "AwardCode",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "AwardCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "AwardDescription",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "AwardDescription",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Date",
+                                    "type": "DateTime",
+                                    "physicalType": "datetime"
+                                },
+                                "sink": {
+                                    "name": "Date",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Day",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "Day",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "DayFromDate",
+                                    "type": "String",
+                                    "physicalType": "nvarchar"
+                                },
+                                "sink": {
+                                    "name": "DayFromDate",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Schedule",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "Schedule",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "RawStartTime",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "RawStartTime",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "RawEndtime",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "RawEndtime",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "FormattedStartTime",
+                                    "type": "Decimal",
+                                    "physicalType": "decimal",
+                                    "scale": 2,
+                                    "precision": 19
+                                },
+                                "sink": {
+                                    "name": "FormattedStartTime",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "FormattedEndTime",
+                                    "type": "Decimal",
+                                    "physicalType": "decimal",
+                                    "scale": 2,
+                                    "precision": 19
+                                },
+                                "sink": {
+                                    "name": "FormattedEndTime",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "HasUnpaidBreak",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "HasUnpaidBreak",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "OverrideLunch",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "OverrideLunch",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "BreakAmount",
+                                    "type": "Decimal",
+                                    "physicalType": "decimal",
+                                    "scale": 6,
+                                    "precision": 24
+                                },
+                                "sink": {
+                                    "name": "BreakAmount",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "TotalAmount",
+                                    "type": "Decimal",
+                                    "physicalType": "decimal",
+                                    "scale": 2,
+                                    "precision": 18
+                                },
+                                "sink": {
+                                    "name": "TotalAmount",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Text",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "Text",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "TaskCode",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "TaskCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Allowance",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "Allowance",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "ReasonCode",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "ReasonCode",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "Overtime",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "Overtime",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "BrokenShift",
+                                    "type": "String",
+                                    "physicalType": "varchar"
+                                },
+                                "sink": {
+                                    "name": "BrokenShift",
+                                    "type": "String",
+                                    "physicalType": "String"
+                                }
+                            }
+                        ],
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                            "allowDataTruncation": true,
+                            "treatBooleanAsNumber": false
+                        }
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SQL_Timesheet_Data",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "csv_TimesheetExport_AllClocks",
+                        "type": "DatasetReference"
+                    }
+                ]
+            }
+        ],
+        "parameters": {
+            "timesheetStartDate": {
+                "type": "string"
+            },
+            "timesheetEndDate": {
+                "type": "string"
+            }
+        },
+        "variables": {
+            "BaseURI": {
+                "type": "String"
+            },
+            "CompanyId": {
+                "type": "String"
+            },
+            "APIUserName": {
+                "type": "String"
+            },
+            "APIPassword": {
+                "type": "String"
+            },
+            "APIKey": {
+                "type": "String"
+            },
+            "AuthKey": {
+                "type": "String"
+            },
+            "AzureFunctionKey": {
+                "type": "String"
+            }
+        },
+        "annotations": [],
+        "lastPublishTime": "2021-07-05T07:50:06Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}
