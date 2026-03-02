@@ -1,0 +1,28 @@
+{
+    "name": "TimesheetData",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "Workforce Ready",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+            "location": {
+                "type": "HttpServerLocation",
+                "relativeUrl": "v1/report/saved/19204256"
+            },
+            "columnDelimiter": "\t",
+            "escapeChar": "\"",
+            "firstRowAsHeader": true,
+            "quoteChar": "'"
+        },
+        "schema": [
+            {
+                "name": "\"Workday\",\"Employee Id\",\"Date\",\"Cost Centre\",\"Location\",\"Position\",\"Award\",\"First Name\",\"Last Name\",\"Start Time\",\"End Time\",\"Total Time\",\"Schedule\",\"Sleepover\",\"Unpaid Break\",\"Unpaid Break Time\",\"Time Off Type\",\"Activity\",\" Overtime\",\"Comments\"",
+                "type": "String"
+            }
+        ]
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}
