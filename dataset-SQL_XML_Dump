@@ -1,0 +1,22 @@
+{
+    "name": "SQL_XML_Dump",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "Integration Database",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "AzureSqlTable",
+        "schema": [
+            {
+                "name": "XMLData",
+                "type": "varchar"
+            }
+        ],
+        "typeProperties": {
+            "schema": "dbo",
+            "table": "UKG_XMLDump"
+        }
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}
