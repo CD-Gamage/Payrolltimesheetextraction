@@ -1,0 +1,27 @@
+{
+    "name": "csv_TimesheetExport",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "File Storage",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobStorageLocation",
+                "fileName": {
+                    "value": "@concat('combined-',string(utcnow()),'.csv')",
+                    "type": "Expression"
+                },
+                "container": "timesheet-exports"
+            },
+            "columnDelimiter": ",",
+            "escapeChar": "\\",
+            "firstRowAsHeader": true,
+            "quoteChar": "\""
+        },
+        "schema": []
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}
