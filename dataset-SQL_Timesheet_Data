@@ -1,0 +1,96 @@
+{
+    "name": "SQL_Timesheet_Data",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "Integration Database",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "AzureSqlTable",
+        "schema": [
+            {
+                "name": "EmployeeId",
+                "type": "varchar"
+            },
+            {
+                "name": "Date",
+                "type": "datetime",
+                "precision": 23,
+                "scale": 3
+            },
+            {
+                "name": "CostCentre",
+                "type": "varchar"
+            },
+            {
+                "name": "Location",
+                "type": "varchar"
+            },
+            {
+                "name": "Position",
+                "type": "varchar"
+            },
+            {
+                "name": "Award",
+                "type": "varchar"
+            },
+            {
+                "name": "FirstName",
+                "type": "varchar"
+            },
+            {
+                "name": "LastName",
+                "type": "varchar"
+            },
+            {
+                "name": "StartTime",
+                "type": "varchar"
+            },
+            {
+                "name": "EndTime",
+                "type": "varchar"
+            },
+            {
+                "name": "TotalTime",
+                "type": "varchar"
+            },
+            {
+                "name": "Schedule",
+                "type": "varchar"
+            },
+            {
+                "name": "Sleepover",
+                "type": "varchar"
+            },
+            {
+                "name": "UnpaidBreak",
+                "type": "varchar"
+            },
+            {
+                "name": "UnpaidBreakTime",
+                "type": "varchar"
+            },
+            {
+                "name": "TimeOffType",
+                "type": "varchar"
+            },
+            {
+                "name": "Activity",
+                "type": "varchar"
+            },
+            {
+                "name": "Overtime",
+                "type": "varchar"
+            },
+            {
+                "name": "Comments",
+                "type": "varchar"
+            }
+        ],
+        "typeProperties": {
+            "schema": "dbo",
+            "table": "UKG_TimeSheetData"
+        }
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}
