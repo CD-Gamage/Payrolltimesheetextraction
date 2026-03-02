@@ -1,0 +1,27 @@
+{
+    "name": "csv_TimesheetExport_AllClocks",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "File Storage",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobStorageLocation",
+                "fileName": {
+                    "value": "@concat('all-clocks-',string(utcnow()),'.csv')",
+                    "type": "Expression"
+                },
+                "container": "timesheet-exports"
+            },
+            "columnDelimiter": ",",
+            "escapeChar": "\\",
+            "firstRowAsHeader": true,
+            "quoteChar": "\""
+        },
+        "schema": []
+    },
+    "type": "Microsoft.DataFactory/factories/datasets"
+}
